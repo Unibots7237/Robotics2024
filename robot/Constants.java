@@ -137,6 +137,39 @@ public final class Constants {
     public static final double kPYController = 1;
     public static final double kPThetaController = 1;
 
+    public static final double stageTagHeightInches = 48.81;
+    public static final double ampTagHeightInches = 50.13;
+    public static final double speakerTagHeightInches = 53.88; // there are two apriltags below the speaker, one is centered and the other is to its left.
+    public static final double distanceBetweenRightEdgesOfSpeakerTagsInches = 22.25; // they are both on the same height. this variable gives the distance between their right edges
+    public static final double distanceBetweenSpeakerTagsInches = 15.75; // this is the shortest distance between them
+
+    public static final double BlueSourceRightID = 1;
+    public static final double BlueSourceLeftID = 2;
+
+    public static final double RedSourceRightID = 9;
+    public static final double ResourceLeftID = 10;
+
+    public static final double BlueAmpID = 6;
+    public static final double RedAmpID = 5;
+
+    public static final double BlueSpeakerCenterID = 8;
+    public static final double BlueSpeakerRightID = 7;
+    
+    public static final double RedSpeakerCenterID = 10;
+    public static final double RedSpeakerRightID = 9;
+
+    public static final double RedStageSide1ID = 11;
+    public static final double RedStageSide2ID = 12;
+    public static final double RedStageSide3ID = 13;
+
+    public static final double BlueStageSide1ID = 14;
+    public static final double BlueStageSide2ID = 15;
+    public static final double BlueStageSide3ID = 16;
+
+    public static final double limelightHeight = 0;
+    public static final double limelightAngle = 0;
+
+
     // Constraint for the motion profiled robot angle controller
     public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
