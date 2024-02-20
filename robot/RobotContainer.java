@@ -28,9 +28,19 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.autocommands.IntakeAmp;
+import frc.robot.autocommands.IntakeEject;
+import frc.robot.autocommands.IntakeGround;
+import frc.robot.autocommands.IntakeStow;
 import frc.robot.commands.ClimberCommand;
+import frc.robot.commands.IntakeCommand;
+import frc.robot.commands.NoCommand;
+import frc.robot.commands.ShooterCommand;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.IntakeSubsystem.PivotTarget;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -39,7 +49,10 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -55,7 +68,15 @@ public class RobotContainer {
   Joystick m_driverJoystickTurning = new Joystick(OIConstants.kDriverJoystickTurningPort);
   XboxController m_secondaryController = new XboxController(OIConstants.kSecondaryControllerPort);
 
-  private final DriveSubsystem m_robotDrive = new DriveSubsystem(m_driverJoystickTurning);
+  public final DriveSubsystem m_robotDrive = new DriveSubsystem(m_driverJoystickTurning);
+  public final IntakeSubsystem m_intake = IntakeSubsystem.getInstance();
+  public final ShooterSubsystem m_shooter = new ShooterSubsystem();
+  public final ClimberSubsystem m_climber = new ClimberSubsystem();
+
+  private final IntakeCommand m_intakeCommand = new IntakeCommand(m_intake, m_driverJoystick, m_secondaryController);
+  private final NoCommand nocommand = new NoCommand();
+  private final ClimberCommand climbercommand = new ClimberCommand(m_climber, m_secondaryController);
+  private final ShooterCommand shootercommand = new ShooterCommand(m_shooter);
 
   //ClimberSubsystem climbersubsystem = new ClimberSubsystem();
   //ClimberCommand climbercommand = new ClimberCommand(climbersubsystem, m_secondaryController);
@@ -63,30 +84,25 @@ public class RobotContainer {
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
-  private final SendableChooser<String> m_chooser = new SendableChooser<>();
+  private final SendableChooser<String> firstChooser = new SendableChooser<>();
+  private final SendableChooser<String> secondChooser = new SendableChooser<>();
+  private final SendableChooser<String> thirdChooser = new SendableChooser<>();
+  private final SendableChooser<String>[] chooserArray = new SendableChooser[10];
+  private final Stream<SendableChooser<String>> chooserStream = Arrays.stream(chooserArray);
   public RobotContainer() {
+
     //sendable chooser
 
-    m_chooser.addOption("Speaker Only VVV", null);
-
-    m_chooser.setDefaultOption("BLUE_OnlySpeakerStartingNote", "BLUE_OnlySpeakerStartingNote");
-    m_chooser.addOption("BLUE_OnlySpeakerLeftNote", "BLUE_OnlySpeakerLeftNote");
-    m_chooser.addOption("BLUE_OnlySpeakerTwoLeftNotes", "BLUE_OnlySpeakerTwoLeftNotes");
-    m_chooser.addOption("BLUE_OnlySpeakerRightNote", "BLUE_OnlySpeakerRightNote");
-    m_chooser.addOption("BLUE_OnlySpeakerTwoRightNotes", "BLUE_OnlySpeakerTwoRightNotes");
-    m_chooser.addOption("BLUE_OnlySpeakerCenterNote", "BLUE_OnlySpeakerCenterNote");
-    m_chooser.addOption("BLUE_OnlySpeakerLeftCenterNotes", "BLUE_OnlySpeakerLeftCenterNotes");
-    m_chooser.addOption("BLUE_OnlySpeakerRightCenterNotes", "BLUE_OnlySpeakerRightCenterNotes");
-
-    m_chooser.addOption("AMP Only VVV", null);
-
-    m_chooser.addOption("BLUE_OnlyAmpStartingNote", "BLUE_OnlyAmpStartingNote");
-    m_chooser.addOption("BLUE_OnlyAmpLeftNote", "BLUE_OnlyAmpLeftNote");
-
-    SmartDashboard.putData("Autonomous Chooser", m_chooser);
+    SmartDashboard.putData("first autonomous", firstChooser);
+    SmartDashboard.putData("second autonomous", secondChooser);
 
     // Configure the button bindings
     configureButtonBindings();
+    
+    m_intake.setDefaultCommand(m_intakeCommand);
+    m_climber.setDefaultCommand(climbercommand);
+    m_shooter.setDefaultCommand(shootercommand);
+
 
     // Configure default commands
     m_robotDrive.setDefaultCommand(
@@ -124,157 +140,169 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand() {
-  TrajectoryConfig config =
-      new TrajectoryConfig(
-              AutoConstants.kMaxSpeedMetersPerSecond,
-              AutoConstants.kMaxAccelerationMetersPerSecondSquared)
-          // Add kinematics to ensure max speed is actually obeyed
-          .setKinematics(DriveConstants.kDriveKinematics);
+  private final IntakeAmp intakeamp = new IntakeAmp(m_intake);
+  private final IntakeEject intakeeject = new IntakeEject(m_intake);
+  private final IntakeGround intakeground = new IntakeGround(m_intake);
+  private final IntakeStow intakestow = new IntakeStow(m_intake);
+
+  private final Command chosenautonomouscommand(String selected) {
+    TrajectoryConfig config =
+        new TrajectoryConfig(
+                AutoConstants.kMaxSpeedMetersPerSecond,
+                AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+            // Add kinematics to ensure max speed is actually obeyed
+            .setKinematics(DriveConstants.kDriveKinematics);
 
 
-  var thetaController =
-    new ProfiledPIDController(
-      AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
-  thetaController.enableContinuousInput(-Math.PI, Math.PI);
+    var thetaController =
+        new ProfiledPIDController(
+        AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
+    thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
-  System.out.println(m_robotDrive.getPose());
+    if (selected == "shoot intake") {
+        return intakeeject;
+    }
+    if (selected == "intake to ground") {
+        return intakeground;
+    }
+    if (selected == "intake to stow") {
+        return intakestow;
+    }
+    if (selected == "intake to amp") {
+        return intakeamp;
+    }
+    if (selected == "to left note") {
+        Trajectory LeftNote =
+        TrajectoryGenerator.generateTrajectory(
+            m_robotDrive.getPose(),
+            List.of(),
+            new Pose2d(Units.inchesToMeters(114), Units.inchesToMeters(161.64), new Rotation2d(0)),
+            config);
 
+        SwerveControllerCommand LeftNoteCommand =
+        new SwerveControllerCommand(
+            LeftNote,
+            m_robotDrive::getPose, // Functional interface to feed supplier
+            DriveConstants.kDriveKinematics,
+            // Position controllers
+            new PIDController(AutoConstants.kPXController, 0, 0),
+            new PIDController(AutoConstants.kPYController, 0, 0),
+            thetaController,
+            m_robotDrive::setModuleStates,
+            m_robotDrive);
+        
+            return LeftNoteCommand;
+    }
+    if (selected == "to right note") {
+        Trajectory RightNote =
+        TrajectoryGenerator.generateTrajectory(
+            m_robotDrive.getPose(),
+            List.of(),
+            new Pose2d(Units.inchesToMeters(114), Units.inchesToMeters(47.64), new Rotation2d(0)),
+            config);
 
+        SwerveControllerCommand RightNoteCommand =
+        new SwerveControllerCommand(
+            RightNote,
+            m_robotDrive::getPose, // Functional interface to feed supplier
+            DriveConstants.kDriveKinematics,
+            // Position controllers
+            new PIDController(AutoConstants.kPXController, 0, 0),
+            new PIDController(AutoConstants.kPYController, 0, 0),
+            thetaController,
+            m_robotDrive::setModuleStates,
+            m_robotDrive);
+        return RightNoteCommand;
+    }
+    if (selected == "to middle note") {
+        Trajectory MiddleNote =
+        TrajectoryGenerator.generateTrajectory(
+            m_robotDrive.getPose(),
+            List.of(),
+            new Pose2d(Units.inchesToMeters(114), Units.inchesToMeters(104.64), new Rotation2d(0)),
+            config);
 
+        SwerveControllerCommand MiddleNoteCommand =
+        new SwerveControllerCommand(
+            MiddleNote,
+            m_robotDrive::getPose, // Functional interface to feed supplier
+            DriveConstants.kDriveKinematics,
+            // Position controllers
+            new PIDController(AutoConstants.kPXController, 0, 0),
+            new PIDController(AutoConstants.kPYController, 0, 0),
+            thetaController,
+            m_robotDrive::setModuleStates,
+            m_robotDrive);
+        return MiddleNoteCommand;
+    }
+    if (selected == "to speaker") {
+        Trajectory Speaker =
+        TrajectoryGenerator.generateTrajectory(
+            m_robotDrive.getPose(),
+            List.of(),
+            new Pose2d(Units.inchesToMeters((Constants.DriveConstants.kWheelBase)/2), Units.inchesToMeters(104.64), new Rotation2d(0)),
+            config);
 
-  //TRAJECTORIES FOR EVERY AUTONOMOUS PROCEDURE
-  //BLUE SIDE AUTONOMOUS:
-  Trajectory BLUE_LeftNote =
-  TrajectoryGenerator.generateTrajectory(
-      m_robotDrive.getPose(),
-      List.of(),
-      new Pose2d(Units.inchesToMeters(114), Units.inchesToMeters(161.64), new Rotation2d(0)),
-      config);
+        SwerveControllerCommand SpeakerCommand =
+        new SwerveControllerCommand(
+            Speaker,
+            m_robotDrive::getPose, // Functional interface to feed supplier
+            DriveConstants.kDriveKinematics,
+            // Position controllers
+            new PIDController(AutoConstants.kPXController, 0, 0),
+            new PIDController(AutoConstants.kPYController, 0, 0),
+            thetaController,
+            m_robotDrive::setModuleStates,
+            m_robotDrive);
+        return SpeakerCommand;
+    }
+    if (selected == "to amp") {
+        Trajectory Amp =
+        TrajectoryGenerator.generateTrajectory(
+            m_robotDrive.getPose(),
+            List.of(),
+            new Pose2d(Units.inchesToMeters(76.1), Units.inchesToMeters((Constants.DriveConstants.kWheelBase)/2), new Rotation2d(Units.radiansToDegrees(90))),
+            config);
+            
 
-  Trajectory BLUE_RightNote =
-  TrajectoryGenerator.generateTrajectory(
-      m_robotDrive.getPose(),
-      List.of(),
-      new Pose2d(Units.inchesToMeters(114), Units.inchesToMeters(47.64), new Rotation2d(0)),
-      config);
-
-  Trajectory Blue_MiddleNote =
-  TrajectoryGenerator.generateTrajectory(
-      m_robotDrive.getPose(),
-      List.of(),
-      new Pose2d(Units.inchesToMeters(114), Units.inchesToMeters(104.64), new Rotation2d(0)),
-      config);
-
-  Trajectory BLUE_Speaker =
-  TrajectoryGenerator.generateTrajectory(
-      m_robotDrive.getPose(),
-      List.of(),
-      new Pose2d(Units.inchesToMeters((Constants.DriveConstants.kWheelBase)/2), Units.inchesToMeters(104.64), new Rotation2d(0)),
-      config);
-
-  Trajectory BLUE_Amp =
-  TrajectoryGenerator.generateTrajectory(
-      m_robotDrive.getPose(),
-      List.of(),
-      new Pose2d(Units.inchesToMeters(76.1), Units.inchesToMeters((Constants.DriveConstants.kWheelBase)/2), new Rotation2d(Units.radiansToDegrees(90))),
-      config);
-
-  SwerveControllerCommand BLUE_LeftNoteCommand =
-  new SwerveControllerCommand(
-      BLUE_LeftNote,
-      m_robotDrive::getPose, // Functional interface to feed supplier
-      DriveConstants.kDriveKinematics,
-      // Position controllers
-      new PIDController(AutoConstants.kPXController, 0, 0),
-      new PIDController(AutoConstants.kPYController, 0, 0),
-      thetaController,
-      m_robotDrive::setModuleStates,
-      m_robotDrive);
-    
-  SwerveControllerCommand BLUE_RightNoteCommand =
-  new SwerveControllerCommand(
-      BLUE_RightNote,
-      m_robotDrive::getPose, // Functional interface to feed supplier
-      DriveConstants.kDriveKinematics,
-      // Position controllers
-      new PIDController(AutoConstants.kPXController, 0, 0),
-      new PIDController(AutoConstants.kPYController, 0, 0),
-      thetaController,
-      m_robotDrive::setModuleStates,
-      m_robotDrive);
-
-  SwerveControllerCommand BLUE_MiddleNoteCommand =
-  new SwerveControllerCommand(
-      Blue_MiddleNote,
-      m_robotDrive::getPose, // Functional interface to feed supplier
-      DriveConstants.kDriveKinematics,
-      // Position controllers
-      new PIDController(AutoConstants.kPXController, 0, 0),
-      new PIDController(AutoConstants.kPYController, 0, 0),
-      thetaController,
-      m_robotDrive::setModuleStates,
-      m_robotDrive);
-
-  SwerveControllerCommand BLUE_SpeakerCommand =
-  new SwerveControllerCommand(
-      BLUE_Speaker,
-      m_robotDrive::getPose, // Functional interface to feed supplier
-      DriveConstants.kDriveKinematics,
-      // Position controllers
-      new PIDController(AutoConstants.kPXController, 0, 0),
-      new PIDController(AutoConstants.kPYController, 0, 0),
-      thetaController,
-      m_robotDrive::setModuleStates,
-      m_robotDrive);
-
-  SwerveControllerCommand BLUE_AmpCommand =
-  new SwerveControllerCommand(
-      BLUE_Amp,
-      m_robotDrive::getPose, // Functional interface to feed supplier
-      DriveConstants.kDriveKinematics,
-      // Position controllers
-      new PIDController(AutoConstants.kPXController, 0, 0),
-      new PIDController(AutoConstants.kPYController, 0, 0),
-      thetaController,
-      m_robotDrive::setModuleStates,
-      m_robotDrive);
-
-    //the autonomous
-    if (m_chooser.getSelected() == "BLUE_OnlySpeakerStartingNote") {
-            return Commands.sequence(
-            BLUE_SpeakerCommand,
-            //shoot after the InstantCommand
-            new InstantCommand(() -> m_robotDrive.drive(0,0,0,false,true)));
-    } 
-    if (m_chooser.getSelected() == "BLUE_OnlySpeakerLeftNote") {
-            return Commands.sequence(
-            BLUE_SpeakerCommand,
-            //shoot
-            //lower intake (which would turn on intake motor also)
-            BLUE_LeftNoteCommand,
-            //raise intake
-            BLUE_SpeakerCommand,
-            //shoot after the InstantCommand
-            new InstantCommand(() -> m_robotDrive.drive(0,0,0,false,true)));
-    } 
-    if (m_chooser.getSelected() == "BLUE_OnlyAmpStartingNote") {
-            return Commands.sequence(
-            BLUE_AmpCommand,
-            //shoot after the InstantCommand
-            new InstantCommand(() -> m_robotDrive.drive(0,0,0,false,true)));
-    } 
-    if (m_chooser.getSelected() == "BLUE_OnlyAmpLeftNote") {
-            return Commands.sequence(
-            BLUE_AmpCommand,
-            //shoot
-            //lower intake
-            BLUE_LeftNoteCommand,
-            //raise intake
-            BLUE_AmpCommand,
-            //shoot after instant command
-            new InstantCommand(() -> m_robotDrive.drive(0,0,0,false,true)));
-    } 
-    return null;
+        SwerveControllerCommand AmpCommand =
+        new SwerveControllerCommand(
+            Amp,
+            m_robotDrive::getPose, // Functional interface to feed supplier
+            DriveConstants.kDriveKinematics,
+            // Position controllers
+            new PIDController(AutoConstants.kPXController, 0, 0),
+            new PIDController(AutoConstants.kPYController, 0, 0),
+            thetaController,
+            m_robotDrive::setModuleStates,
+            m_robotDrive);
+        return AmpCommand;
+    }
+    return nocommand;
   }
+
+  public Command getAutonomousCommand() {
+
+        chooserStream.forEach(
+            e -> {
+                e.setDefaultOption("nothing this step", "nothing this step");
+                e.addOption("intake eject", "shoot intake");
+                e.addOption("intake to ground (will spin intake motors)", "intake to ground");
+                e.addOption("intake to stow", "intake to stow");
+                e.addOption("intake to amp", "intake to amp");
+                e.addOption("to left note", "to left note");
+                e.addOption("to right note", "to right note");
+                e.addOption("to middle note", "to middle note");
+                e.addOption("to speaker", "to speaker");
+                e.addOption("to amp", "to amp");
+            }
+        );
+
+        return Commands.sequence(
+                shootercommand,
+                chosenautonomouscommand(firstChooser.getSelected()),
+                chosenautonomouscommand(secondChooser.getSelected()),
+                chosenautonomouscommand(thirdChooser.getSelected()),
+                new InstantCommand(() -> m_robotDrive.drive(0,0,0,false,true)));
+    }
 }

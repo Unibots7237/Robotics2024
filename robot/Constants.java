@@ -62,11 +62,14 @@ public final class Constants {
     public static final int kFrontRightTurningCanId = 1;
     public static final int kRearRightTurningCanId = 7;
 
+    public static final int rightHangarCanId = 11;
+    public static final int leftHangarCanId = 12;
+
     
     
     public static final boolean kGyroReversed = false;
 
-    public static final double climberArmSpeed = 0.15;
+    public static final double climberArmSpeed = 0.3;
   }
 
   public static final class ModuleConstants {
@@ -137,11 +140,11 @@ public final class Constants {
     public static final double kPYController = 1;
     public static final double kPThetaController = 1;
 
-    public static final double stageTagHeightInches = 48.81;
-    public static final double ampTagHeightInches = 50.13;
-    public static final double speakerTagHeightInches = 53.88; // there are two apriltags below the speaker, one is centered and the other is to its left.
-    public static final double distanceBetweenRightEdgesOfSpeakerTagsInches = 22.25; // they are both on the same height. this variable gives the distance between their right edges
-    public static final double distanceBetweenSpeakerTagsInches = 15.75; // this is the shortest distance between them
+    public static final double stageTagHeight = 48.81;
+    public static final double ampTagHeight = 50.13;
+    public static final double speakerTagHeight = 53.88; // there are two apriltags below the speaker, one is centered and the other is to its left.
+    public static final double distanceBetweenRightEdgesOfSpeakerTags = 22.25; // they are both on the same height. this variable gives the distance between their right edges
+    public static final double distanceBetweenSpeakerTags = 15.75; // this is the shortest distance between them
 
     public static final double BlueSourceRightID = 1;
     public static final double BlueSourceLeftID = 2;
@@ -166,14 +169,49 @@ public final class Constants {
     public static final double BlueStageSide2ID = 15;
     public static final double BlueStageSide3ID = 16;
 
-    public static final double limelightHeight = 0;
+    public static final double limelightHeight = 14.5;
     public static final double limelightAngle = 0;
-
 
     // Constraint for the motion profiled robot angle controller
     public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
   }
+
+  public static class Intake {
+    // Motors
+    public static final int kIntakeMotorId = 9;
+    public static final int kPivotMotorId = 10;
+
+    // DIO
+    public static final int k_pivotEncoderId = 0;
+    public static final int k_intakeLimitSwitchId = 2;
+
+    // Absolute encoder offset
+    public static final double k_pivotEncoderOffset = 0.166842; // Straight up, sketchy to reset to "up"
+
+    // Pivot set point angles
+    public static final double k_pivotAngleGround = 0;
+    public static final double k_pivotAngleSource = 130;
+    public static final double k_pivotAngleAmp = k_pivotAngleSource;
+    public static final double k_pivotAngleStow = 215;
+
+    // Intake speeds
+    public static final double k_intakeSpeed = 0.7;
+    public static final double k_ejectSpeed = -0.45;
+    public static final double k_feedShooterSpeed = -0.5;
+  }
+
+    // Shooter
+    public static final int kShooterLeftMotorId = 14;
+    public static final int kShooterRightMotorId = 13;
+  
+    public static final double kShooterP = 0.00005;
+    public static final double kShooterI = 0.0;
+    public static final double kShooterD = 0.0;
+    public static final double kShooterFF = 0.0002;
+  
+    public static final double kShooterMinOutput = 0;
+    public static final double kShooterMaxOutput = 1;
 
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;

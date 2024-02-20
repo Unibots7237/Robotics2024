@@ -34,18 +34,30 @@ public class ClimberCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (((m_secondarycontroller.getRightTriggerAxis())/5) > 0.015) {
-      m_subsystem.moveRightClimber(false, ((m_secondarycontroller.getRightTriggerAxis())/5));
-    }
-    if (m_secondarycontroller.getRightBumper()) {
+    boolean didsomethingright = false;
+    boolean didsomethingleft = false;
+    if (m_secondarycontroller.getRightTriggerAxis() > 0.05) {
+      didsomethingright = true;
       m_subsystem.moveRightClimber(true, (Constants.DriveConstants.climberArmSpeed));
     }
+    if (m_secondarycontroller.getRightBumper()) {
+      didsomethingright = true;
+      m_subsystem.moveRightClimber(false, (Constants.DriveConstants.climberArmSpeed));
+    }
 
-    if (((m_secondarycontroller.getLeftTriggerAxis())/5) > 0.015) {
-      m_subsystem.moveLeftClimber(false, ((m_secondarycontroller.getRightTriggerAxis())/5));
+    if (m_secondarycontroller.getLeftTriggerAxis() > 0.05) {
+      didsomethingleft = true;
+      m_subsystem.moveLeftClimber(true, (Constants.DriveConstants.climberArmSpeed));
     }
     if (m_secondarycontroller.getLeftBumper()) {
-      m_subsystem.moveLeftClimber(true, (Constants.DriveConstants.climberArmSpeed));
+      didsomethingleft = true;
+      m_subsystem.moveLeftClimber(false, (Constants.DriveConstants.climberArmSpeed));
+    }
+    if (!didsomethingleft) {
+      m_subsystem.setZeroLeft();
+    }
+    if (!didsomethingright) {
+      m_subsystem.setZeroRight();
     }
   }
 

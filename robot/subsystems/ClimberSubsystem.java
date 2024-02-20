@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -8,21 +9,32 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class ClimberSubsystem extends SubsystemBase {
-  public ClimberSubsystem() {}
+  public CANSparkMax leftclimbermotor = new CANSparkMax(Constants.DriveConstants.leftHangarCanId, MotorType.kBrushless);
+  public CANSparkMax rightclimbermotor = new CANSparkMax(Constants.DriveConstants.rightHangarCanId, MotorType.kBrushless);
 
-  public CANSparkMax leftclimbermotor = new CANSparkMax(9, MotorType.kBrushless);
-  public CANSparkMax rightclimbermotor = new CANSparkMax(10, MotorType.kBrushless);
+  public ClimberSubsystem() {
+    leftclimbermotor.setIdleMode(IdleMode.kBrake);
+    rightclimbermotor.setIdleMode(IdleMode.kBrake);
+  }
+
 
   public void moveLeftClimber(boolean isGoingUp, double speed) {
     if (isGoingUp) {
-      leftclimbermotor.set(speed);
-    } else {leftclimbermotor.set(-speed);}
+      leftclimbermotor.set(speed/2);
+    } else {leftclimbermotor.set(-speed/2);}
   }
  
-    public void moveRightClimber(boolean isGoingUp, double speed) {
+  public void moveRightClimber(boolean isGoingUp, double speed) {
     if (isGoingUp) {
       rightclimbermotor.set(speed);
     } else {rightclimbermotor.set(-speed);}
+  }
+
+  public void setZeroLeft() {
+    leftclimbermotor.set(0);
+  };
+  public void setZeroRight() {
+    rightclimbermotor.set(0);
   }
 
   /**

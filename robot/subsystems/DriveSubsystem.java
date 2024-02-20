@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import frc.robot.LimelightHelpers;
 import frc.robot.Robot;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.utils.SwerveUtils;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -119,10 +120,10 @@ public class DriveSubsystem extends SubsystemBase {
         });
 
     if (DriverStation.isDisabled()) {
-      m_odometry.addVisionMeasurement(LimelightHelpers.getBotPose2d_wpiBlue("limelight"), Timer.getFPGATimestamp());
+      //m_odometry.addVisionMeasurement(LimelightHelpers.getBotPose2d_wpiBlue("limelight"), Timer.getFPGATimestamp());
     } else{
       if (LimelightHelpers.getTV("limelight")) {
-          m_odometry.addVisionMeasurement(LimelightHelpers.getBotPose2d_wpiBlue("limelight"), Timer.getFPGATimestamp());
+          //m_odometry.addVisionMeasurement(LimelightHelpers.getBotPose2d_wpiBlue("limelight"), Timer.getFPGATimestamp());
       }
      }
     
@@ -132,10 +133,10 @@ public class DriveSubsystem extends SubsystemBase {
 
     SmartDashboard.putNumber("Robot X Coordinate", m_odometry.getEstimatedPosition().getX());
     SmartDashboard.putNumber("Robot Y Coordinate", m_odometry.getEstimatedPosition().getY());
-    SmartDashboard.putNumber("gyro", getGyroOnInterval(m_gyro.getAngle()));
-    SmartDashboard.putNumber("Horizontal Angle to Target", LimelightHelpers.getTX(getName()));
-    SmartDashboard.putNumber("Vertical Angle to Target", LimelightHelpers.getTY(getName()));
-    SmartDashboard.putBoolean("Target Detected?", LimelightHelpers.getTV(getName()));
+    SmartDashboard.putNumber("Gyro", getGyroOnInterval(m_gyro.getAngle()));
+    SmartDashboard.putNumber("Horizontal Angle to Target", LimelightHelpers.getTX("limelight"));
+    SmartDashboard.putNumber("Vertical Angle to Target", LimelightHelpers.getTY("limelight"));
+    SmartDashboard.putBoolean("Target Detected?", LimelightHelpers.getTV("limelight"));
   }
 
   /**
@@ -174,6 +175,25 @@ public class DriveSubsystem extends SubsystemBase {
    *                      field.
    * @param rateLimit     Whether to enable rate limiting for smoother control.
    */
+  public double distanceToTarget;
+  public double getDistanceToTarget(String targetType){
+    switch (targetType){
+      case "Amp":
+        distanceToTarget = ((AutoConstants.ampTagHeight - AutoConstants.limelightHeight) / (Math.tan(LimelightHelpers.getTY("limelight")+AutoConstants.limelightAngle)));
+      case "Speaker":
+        distanceToTarget = ((AutoConstants.speakerTagHeight - AutoConstants.limelightHeight) / (Math.tan(LimelightHelpers.getTY("limelight")+AutoConstants.limelightAngle)));
+    }
+    return distanceToTarget;
+  }
+  /*public void makeHorOffsetZero(){
+    if (LimelightHelpers.getTX("limelight") < -0.05){
+      this.drive(1,1,1,true,false);
+    }else if (){
+      this.
+    }
+
+  }*/
+
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative, boolean rateLimit) {
     
 
