@@ -40,7 +40,11 @@ public class IntakeCommand extends Command {
   @Override
   public void execute() {
     if (m_driverjoystick.getTrigger()) {
-      m_intake.eject();
+      if (m_intake.m_periodicIO.pivot_target != PivotTarget.STOW) {
+        m_intake.eject();
+      } else {
+        m_intake.feedShooter();
+      }
     }
     if (m_secondarycontroller.getAButton()) {
       m_intake.goToAmp();
