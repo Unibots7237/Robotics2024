@@ -54,9 +54,6 @@ public class IntakeCommand extends Command {
     if (m_secondarycontroller.getYButton()) {
       m_intake.goToSource();
     }
-    if (m_intake.getIntakeState() != IntakeState.INTAKE) {
-      m_intake.stopIntake();
-    }
   }
 
   // Called once the command ends or is interrupted.
