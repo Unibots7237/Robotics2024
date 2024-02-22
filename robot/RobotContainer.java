@@ -89,7 +89,29 @@ public class RobotContainer {
   private final SendableChooser<String> thirdChooser = new SendableChooser<>();
   private final SendableChooser<String>[] chooserArray = new SendableChooser[10];
   private final Stream<SendableChooser<String>> chooserStream = Arrays.stream(chooserArray);
+
+
+  // 'top' is with respect to the blue 0,0 corner where the blue and red amp are at the top and the note droppy thing is on the bottom, blue side is on the left
+  //i think, need to check what is the origin of the botpose
+
+  //all these values are assumign the robot is on the blue team. there will be a check if statement to replace them to valuess if on red team (only changing the X value really)
+  private double noteX = 114;;
+  private double topNoteY = 293.64;
+  private double middleNoteY = 218.64;
+  private double bottomNoteY = 275.64;
+
+  private double speakerY = 218.64;
+  private double speakerX = Constants.DriveConstants.kWheelBase)/2;
+
+  //keep in mind for the amp the robot also has to turn 90 degrees
+  //the angle for the rest of the paths should theoretically be calculatable using trigonoemtry but i need to do that, right now they just face 0 when going (WHICH WILL NOT WORK)
+  private double ampY = Constants.DriveConstants.kWheelBase)/2;
+  private double ampX = 76.1
+  
   public RobotContainer() {
+
+    //dumping the red team X values here so i can add the logic later
+    rednoteX = 
 
     //sendable chooser
 
@@ -140,6 +162,7 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
+  
   private final IntakeAmp intakeamp = new IntakeAmp(m_intake);
   private final IntakeEject intakeeject = new IntakeEject(m_intake);
   private final IntakeGround intakeground = new IntakeGround(m_intake);
