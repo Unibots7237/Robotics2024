@@ -190,14 +190,14 @@ public final class Constants {
     public static final double k_pivotEncoderOffset = 0.166842; // Straight up, sketchy to reset to "up"
 
     // Pivot set point angles
-    public static final double k_pivotAngleGround = 0;
+    public static final double k_pivotAngleGround = 5;
     public static final double k_pivotAngleSource = 130;
     public static final double k_pivotAngleAmp = k_pivotAngleSource;
     public static final double k_pivotAngleStow = 215;
 
     // Intake speeds
     public static final double k_intakeSpeed = 0.7;
-    public static final double k_ejectSpeed = -0.45;
+    public static final double k_ejectSpeed = -0.8;
     public static final double k_feedShooterSpeed = -0.5;
   }
 

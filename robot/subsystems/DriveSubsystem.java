@@ -12,24 +12,16 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.WPIUtilJNI;
-import edu.wpi.first.wpilibj.ADIS16470_IMU;
-import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import frc.robot.LimelightHelpers;
-import frc.robot.Robot;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.utils.SwerveUtils;
@@ -86,7 +78,7 @@ public class DriveSubsystem extends SubsystemBase {
   // Odometry class for tracking robot pose
   SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(
     DriveConstants.kDriveKinematics,
-    Rotation2d.fromDegrees(getGyroOnInterval(m_gyro.getAngle())),
+    Rotation2d.fromDegrees(getGyroOnInterval(m_gyro.getAngle()+180)),
     new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
@@ -111,7 +103,7 @@ public class DriveSubsystem extends SubsystemBase {
   public void periodic() {
     // Update the odometry in the periodic.
     m_odometry.update(
-        Rotation2d.fromDegrees(getGyroOnInterval(m_gyro.getAngle())),
+        Rotation2d.fromDegrees(getGyroOnInterval(m_gyro.getAngle()+180)),
         new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
@@ -133,7 +125,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     SmartDashboard.putNumber("Robot X Coordinate", m_odometry.getEstimatedPosition().getX());
     SmartDashboard.putNumber("Robot Y Coordinate", m_odometry.getEstimatedPosition().getY());
-    SmartDashboard.putNumber("Gyro", getGyroOnInterval(m_gyro.getAngle()));
+    SmartDashboard.putNumber("Gyro", getGyroOnInterval(m_gyro.getAngle()+180));
     SmartDashboard.putNumber("Horizontal Angle to Target", LimelightHelpers.getTX("limelight"));
     SmartDashboard.putNumber("Vertical Angle to Target", LimelightHelpers.getTY("limelight"));
     SmartDashboard.putBoolean("Target Detected?", LimelightHelpers.getTV("limelight"));
@@ -155,7 +147,7 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void resetOdometry(Pose2d pose) {
     m_odometry.resetPosition(
-        Rotation2d.fromDegrees(getGyroOnInterval(getGyroOnInterval(m_gyro.getAngle()))),
+        Rotation2d.fromDegrees(getGyroOnInterval(getGyroOnInterval(m_gyro.getAngle()+180))),
         new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
@@ -255,7 +247,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
         fieldRelative
-            ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered, Rotation2d.fromDegrees(getGyroOnInterval(m_gyro.getAngle())))
+            ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered, Rotation2d.fromDegrees(getGyroOnInterval(m_gyro.getAngle()+180)))
             : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
     SwerveDriveKinematics.desaturateWheelSpeeds(
         swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
@@ -308,7 +300,7 @@ public class DriveSubsystem extends SubsystemBase {
    * @return the robot's heading in degrees, from -180 to 180
    */
   public double getHeading() {
-    return Rotation2d.fromDegrees(getGyroOnInterval(m_gyro.getAngle())).getDegrees();
+    return Rotation2d.fromDegrees(getGyroOnInterval(m_gyro.getAngle()+180)).getDegrees();
   }
 
   /**

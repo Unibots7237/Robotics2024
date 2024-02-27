@@ -4,10 +4,9 @@
 
 package frc.robot.commands;
 
-import frc.robot.Constants;
-import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.IntakeSubsystem.IntakeState;
+import frc.robot.subsystems.IntakeSubsystem.PivotTarget;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -29,7 +28,7 @@ public class IntakeCommand extends Command {
     m_driverjoystick = joystick;
     m_secondarycontroller = secondarycontroller;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(m_intake.getInstance());
+    addRequirements(m_intake);
   }
 
 // Called when the command is initially scheduled.
@@ -39,11 +38,14 @@ public class IntakeCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    if (m_intake.getIntakeState() != IntakeState.INTAKE) {
+      m_intake.stopIntake();
+    }
     if (m_driverjoystick.getTrigger()) {
-      if (m_intake.m_periodicIO.pivot_target != PivotTarget.STOW) {
-        m_intake.eject();
-      } else {
+      if (m_intake.m_periodicIO.pivot_target == PivotTarget.STOW) {
         m_intake.feedShooter();
+      } else {
+        m_intake.eject();
       }
     }
     if (m_secondarycontroller.getAButton()) {
@@ -57,6 +59,12 @@ public class IntakeCommand extends Command {
     }
     if (m_secondarycontroller.getYButton()) {
       m_intake.goToSource();
+    }
+    if ((m_intake.m_periodicIO.pivot_target == PivotTarget.GROUND) && !m_driverjoystick.getTrigger()) {
+      m_intake.m_periodicIO.intake_state = IntakeState.INTAKE;
+    }
+    if (m_intake.m_periodicIO.pivot_target == PivotTarget.STOW) {
+      //m_intake.pulse();
     }
   }
 

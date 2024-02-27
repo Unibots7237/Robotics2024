@@ -8,7 +8,7 @@ import frc.robot.subsystems.IntakeSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** An example command that uses an example subsystem. */
-public class IntakeAmp extends Command {
+public class IntakeShooter extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final IntakeSubsystem m_intake;
 
@@ -17,7 +17,7 @@ public class IntakeAmp extends Command {
    *
    * @param m_intake The subsystem used by this command.
    */
-  public IntakeAmp(IntakeSubsystem intake) {
+  public IntakeShooter(IntakeSubsystem intake) {
     m_intake = intake;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(m_intake);
@@ -26,7 +26,7 @@ public class IntakeAmp extends Command {
 // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_intake.goToAmp();;
+    m_intake.feedShooter();
   }
 
   // Called every time the scheduler runs while the command is scheduled.

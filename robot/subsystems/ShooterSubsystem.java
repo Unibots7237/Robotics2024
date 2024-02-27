@@ -8,8 +8,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class ShooterSubsystem extends SubsystemBase {
-  public ShooterSubsystem() {}
-
   public CANSparkMax leftshooter = new CANSparkMax(Constants.kShooterLeftMotorId, MotorType.kBrushless);
   public CANSparkMax rightshooter = new CANSparkMax(Constants.kShooterRightMotorId, MotorType.kBrushless);
 
@@ -18,10 +16,10 @@ public class ShooterSubsystem extends SubsystemBase {
    
    * @return value of some boolean subsystem state, such as a digital sensor.
    */
-  public void ShooterSubsystem () {
-    leftshooter.setInverted(true);
+  public ShooterSubsystem () {
+    //leftshooter.setInverted(true);
     leftshooter.setIdleMode(IdleMode.kCoast);
-    rightshooter.setIdleMode(IdleMode.kBrake);
+    rightshooter.setIdleMode(IdleMode.kCoast);
   }
   
   public boolean exampleCondition() {
@@ -30,8 +28,13 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public void shoot() {
-    leftshooter.set(0.5);
-    rightshooter.set(0.5);
+    leftshooter.set(1);
+    rightshooter.set(-1);
+  }
+
+  public void stop() {
+    leftshooter.set(0);
+    rightshooter.set(0);
   }
 
   @Override
