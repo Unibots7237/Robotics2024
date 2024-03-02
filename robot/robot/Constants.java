@@ -191,7 +191,7 @@ public final class Constants {
 
     // Pivot set point angles
     public static final double k_pivotAngleGround = 5;
-    public static final double k_pivotAngleSource = 130;
+    public static final double k_pivotAngleSource = 120;
     public static final double k_pivotAngleAmp = k_pivotAngleSource;
     public static final double k_pivotAngleStow = 215;
 

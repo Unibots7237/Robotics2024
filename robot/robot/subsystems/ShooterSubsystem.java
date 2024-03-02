@@ -8,8 +8,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class ShooterSubsystem extends SubsystemBase {
-  public ShooterSubsystem() {}
-
   public CANSparkMax leftshooter = new CANSparkMax(Constants.kShooterLeftMotorId, MotorType.kBrushless);
   public CANSparkMax rightshooter = new CANSparkMax(Constants.kShooterRightMotorId, MotorType.kBrushless);
 
@@ -18,7 +16,7 @@ public class ShooterSubsystem extends SubsystemBase {
    
    * @return value of some boolean subsystem state, such as a digital sensor.
    */
-  public void ShooterSubsystem () {
+  public ShooterSubsystem () {
     //leftshooter.setInverted(true);
     leftshooter.setIdleMode(IdleMode.kCoast);
     rightshooter.setIdleMode(IdleMode.kCoast);

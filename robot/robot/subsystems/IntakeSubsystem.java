@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 
-import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -14,17 +13,17 @@ import frc.robot.Constants;
 import frc.robot.Helpers;
 
 public class IntakeSubsystem extends Subsystem {
-  private static final double k_pivotMotorP = 0.12;
+  private static final double k_pivotMotorP = 0.15;
   private static final double k_pivotMotorI = 0.0;
-  private static final double k_pivotMotorD = 0.001;
+  private static final double k_pivotMotorD = 0.0;
 
   private final PIDController m_pivotPID = new PIDController(k_pivotMotorP, k_pivotMotorI, k_pivotMotorD);
 
-  private static final double kS = 0.0;
-  private static final double kG = -1;
-  private static final double kV = 0.0;
-  private static final double kA = 0.0;
-  private final ArmFeedforward feedforward = new ArmFeedforward(kS, kG, kV, kA);
+  //private static final double kS = 0.0;
+  //private static final double kG = -1;
+  //private static final double kV = 0.0;
+  //private static final double kA = 0.0;
+  //private final ArmFeedforward feedforward = new ArmFeedforward(kS, kG, kV, kA);
 
 
   public final DutyCycleEncoder m_pivotEncoder = new DutyCycleEncoder(Constants.Intake.k_pivotEncoderId);
@@ -84,6 +83,8 @@ public class IntakeSubsystem extends Subsystem {
     EJECT,
     PULSE,
     FEED_SHOOTER,
+    SHOOT_OUT_A_LITTLE,
+    SHOOT_IN_A_LITTLE
   }
 
   /*-------------------------------- Generic Subsystem Functions --------------------------------*/
@@ -169,6 +170,10 @@ public class IntakeSubsystem extends Subsystem {
         return 0.0;
       case FEED_SHOOTER:
         return Constants.Intake.k_feedShooterSpeed;
+      case SHOOT_OUT_A_LITTLE:
+        return -0.1;
+      case SHOOT_IN_A_LITTLE:
+        return 0.1;
       default:
         // "Safe" default
         return 0.0;

@@ -4,13 +4,7 @@
 
 package frc.robot.autocommands;
 
-import frc.robot.Constants;
-import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.IntakeSubsystem.IntakeState;
-import frc.robot.subsystems.IntakeSubsystem.PivotTarget;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** An example command that uses an example subsystem. */
@@ -26,13 +20,13 @@ public class IntakeStow extends Command {
   public IntakeStow(IntakeSubsystem intake) {
     m_intake = intake;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(m_intake.getInstance());
+    addRequirements(m_intake);
   }
 
 // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_intake.goToStow();;
+    m_intake.goToStow();
   }
 
   // Called every time the scheduler runs while the command is scheduled.

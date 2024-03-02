@@ -4,19 +4,16 @@
 
 package frc.robot.autocommands;
 
-import frc.robot.Constants;
-import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.IntakeSubsystem.IntakeState;
-import frc.robot.subsystems.IntakeSubsystem.PivotTarget;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** An example command that uses an example subsystem. */
 public class IntakeShooter extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final IntakeSubsystem m_intake;
+
+  Timer timer = new Timer();
 
   /**
    * Creates a new ExampleCommand.
@@ -26,19 +23,21 @@ public class IntakeShooter extends Command {
   public IntakeShooter(IntakeSubsystem intake) {
     m_intake = intake;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(m_intake.getInstance());
+    addRequirements(m_intake);
   }
 
 // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_intake.feedShooter();
+    timer.start();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    
+    if (timer.get() >= 0.25) {
+      m_intake.feedShooter(); 
+    }
   }
 
   // Called once the command ends or is interrupted.
@@ -48,6 +47,9 @@ public class IntakeShooter extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return true;
+    if (timer.get() >= 0.75) {
+      return true;
+    }
+    return false;
   }
 }
