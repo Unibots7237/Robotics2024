@@ -3,6 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
+import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
@@ -18,11 +19,10 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.WPIUtilJNI;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import frc.robot.LimelightHelpers;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
@@ -52,7 +52,8 @@ public class DriveSubsystem extends SubsystemBase {
       DriveConstants.kBackRightChassisAngularOffset);
 
   // The gyro sensor
-  public final ADXRS450_Gyro  m_gyro = new ADXRS450_Gyro();
+  //public final ADXRS450_Gyro  m_gyro = new ADXRS450_Gyro();
+  public final AHRS m_gyro = new AHRS(I2C.Port.kOnboard);
 
     /**
    * Standard deviations of model states. Increase these numbers to trust your model's state estimates less. This
@@ -75,7 +76,7 @@ public class DriveSubsystem extends SubsystemBase {
   private SlewRateLimiter m_rotLimiter = new SlewRateLimiter(DriveConstants.kRotationalSlewRate);
   private double m_prevTime = WPIUtilJNI.now() * 1e-6;
 
-  private Joystick m_driverJoystick;
+  private XboxController xboxController;
 
   // Odometry class for tracking robot pose
   SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(
@@ -92,9 +93,8 @@ public class DriveSubsystem extends SubsystemBase {
     );
 
   /** Creates a new DriveSubsystem. */
-  public DriveSubsystem(Joystick joystick) {
-    m_driverJoystick = joystick;
-    m_gyro.calibrate();
+  public DriveSubsystem(XboxController xbx) {
+    xboxController = xbx;
   }
 
   public double getGyroOnInterval(double degree) {
@@ -125,7 +125,7 @@ public class DriveSubsystem extends SubsystemBase {
       }
      }
     
-    if (m_driverJoystick.getRawButton(2)) {
+    if (xboxController.getYButton()) {
       m_gyro.reset();
     }
 
@@ -198,7 +198,8 @@ public class DriveSubsystem extends SubsystemBase {
     double xSpeedCommanded;
     double ySpeedCommanded;
 
-    if (DriverStation.getAlliance().get() == Alliance.Blue) {
+  if (true) {
+  //if (DriverStation.getAlliance().get() == Alliance.Blue) {
       xSpeed = xSpeed*-1;
       ySpeed = ySpeed*-1;
   }

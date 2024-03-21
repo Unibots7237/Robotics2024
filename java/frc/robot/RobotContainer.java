@@ -16,12 +16,12 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.autocommands.FiveSecondWait;
 import frc.robot.autocommands.IntakeAmp;
 import frc.robot.autocommands.IntakeEject;
 import frc.robot.autocommands.IntakeGround;
@@ -55,17 +55,16 @@ public class RobotContainer {
   //private final ADXRS450_Gyro  m_gyro = new ADXRS450_Gyro();
 
   // The driver's controller
-  Joystick m_driverJoystick = new Joystick(OIConstants.kDriverJoystickPort);
-  Joystick m_driverJoystickTurning = new Joystick(OIConstants.kDriverJoystickTurningPort);
-  XboxController m_secondaryController = new XboxController(OIConstants.kSecondaryControllerPort);
+  XboxController xboxController = new XboxController(OIConstants.xboxPort);
+  XboxController logitechController = new XboxController(OIConstants.logitechPort);
 
-  public final DriveSubsystem m_robotDrive = new DriveSubsystem(m_driverJoystick);
+  public final DriveSubsystem m_robotDrive = new DriveSubsystem(xboxController);
   public final IntakeSubsystem m_intake = IntakeSubsystem.getInstance();
   public final ShooterSubsystem m_shooter = new ShooterSubsystem();
   public final ClimberSubsystem m_climber = new ClimberSubsystem();
 
-  private final IntakeCommand m_intakeCommand = new IntakeCommand(m_intake, m_driverJoystick, m_secondaryController);
-  private final ClimberCommand climbercommand = new ClimberCommand(m_climber, m_secondaryController);
+  private final IntakeCommand m_intakeCommand = new IntakeCommand(m_intake, xboxController, logitechController);
+  private final ClimberCommand climbercommand = new ClimberCommand(m_climber, logitechController);
   private final ShooterCommand shootercommand = new ShooterCommand(m_shooter);
 
   //ClimberSubsystem climbersubsystem = new ClimberSubsystem();
@@ -86,10 +85,23 @@ public class RobotContainer {
   private final SendableChooser<String> tenthChooser = new SendableChooser<>();
   private final SendableChooser<String> eleventhChooser = new SendableChooser<>();
   private final SendableChooser<String> twelfthChooser = new SendableChooser<>();
+  private final SendableChooser<String> thirteenthChooser = new SendableChooser<>();
+  private final SendableChooser<String> fourtheenthChooser = new SendableChooser<>();
+  private final SendableChooser<String> fifteenthChooser = new SendableChooser<>();
+  private final SendableChooser<String> sixteenthChooser = new SendableChooser<>();
+  private final SendableChooser<String> seventeethChooser = new SendableChooser<>();
+  private final SendableChooser<String> eighteenthChooser = new SendableChooser<>();
+  private final SendableChooser<String> ninteenthChooser = new SendableChooser<>();
+  private final SendableChooser<String> twentiethChooser = new SendableChooser<>();
+  private final SendableChooser<String> twentyfirstChooser = new SendableChooser<>();
+  private final SendableChooser<String> twentysecondChooser = new SendableChooser<>();
+  private final SendableChooser<String> twentythirdChooser = new SendableChooser<>();
+  private final SendableChooser<String> twentyfourthChooser = new SendableChooser<>();
 
-
+  private final SendableChooser<String> presetAuto = new SendableChooser<>();
+ 
   @SuppressWarnings("unchecked")
-  private final SendableChooser<String>[] chooserArray = new SendableChooser[12];  
+  private final SendableChooser<String>[] chooserArray = new SendableChooser[24];  
   private final Stream<SendableChooser<String>> chooserStream;
 
 
@@ -108,10 +120,11 @@ public class RobotContainer {
   private double speakerY = 218.64;
   private double speakerX = (Constants.DriveConstants.kWheelBase)/2 + bumperthickness;
 
-  //keep in mind for the amp the robot also has to turn 90 degrees
-  //the angle for the rest of the paths should theoretically be calculatable using trigonoemtry but i need to do that, right now they just face 0 when going (WHICH WILL NOT WORK)
+  //keep in mind for the amp the robot also has to turn +/-90 degrees
+  //the angle for the rest of the paths should theoretically be calculatable using trigonoemtry but i need to do that, right now they just face 0 when going (WHICH WILL NOT WORK) (probably)
   private double ampY = 323-((Constants.DriveConstants.kWheelBase)/2 + bumperthickness);
   private double ampX = 72.5;
+  private double ampAngle = -90; //this will be set to -90 if the robot is on team red
 
   //dumping the red team X values here so i can add the logic later
   //the length of the field in inches is 653.2 (X)
@@ -130,9 +143,10 @@ public class RobotContainer {
   public RobotContainer() {
 
     if (DriverStation.getAlliance().get() == Alliance.Red) {
-        noteX = rednoteX;
-        speakerX = redspeakerX;
-        ampX = redampX;
+        //noteX = rednoteX;
+        //speakerX = redspeakerX;
+        //ampX = redampX;
+        //ampAngle = 90;
     }
 
 
@@ -149,38 +163,65 @@ public class RobotContainer {
     chooserArray[9] = tenthChooser;
     chooserArray[10] = eleventhChooser;
     chooserArray[11] = twelfthChooser;
+    chooserArray[12] = thirteenthChooser;
+    chooserArray[13] = fourtheenthChooser;
+    chooserArray[14] = fifteenthChooser;
+    chooserArray[15] = sixteenthChooser;
+    chooserArray[16] = seventeethChooser;
+    chooserArray[17] = eighteenthChooser;
+    chooserArray[18] = ninteenthChooser;
+    chooserArray[19] = twentiethChooser;
+    chooserArray[20] = twentyfirstChooser;
+    chooserArray[21] = twentysecondChooser;
+    chooserArray[22] = twentythirdChooser;
+    chooserArray[23] = twentyfourthChooser;
 
 
     System.out.println(chooserArray);
 
     chooserStream = Arrays.stream(chooserArray);
 
-    firstChooser.addOption("===FIRST AUTONOMOUS STEP===", "first chooser");
-    secondChooser.addOption("===SECOND AUTONOMOUS STEP===", "second chooser");
-    thirdChooser.addOption("===THIRD AUTONOMOUS STEP===", "third chooser");
-    fourthChooser.addOption("===FOUTH AUTONOMOUS STEP===", "fourth chooser");
-    fifthChooser.addOption("===FIFTH AUTONOMOUS STEP===", "fifth chooser");
-    sixthChooser.addOption("===SIXTH AUTONOMOUS STEP===", "sixth chooser");
-    seventhChooser.addOption("===SEVENTH AUTONOMOUS STEP===", "seventh chooser");
-    eighthChooser.addOption("===EIGHTH AUTONOMOUS STEP===", "eighth chooser");
-    ninthChooser.addOption("===NINTH AUTONOMOUS STEP===", "ninth chooser");
-    tenthChooser.addOption("===TENTH AUTONOMOUS STEP===", "tenth chooser");
-    eleventhChooser.addOption("===ELEVENTH AUTONOMOUS STEP===", "eleventh chooser");
-    twelfthChooser.addOption("===TWELFTH AUTONOMOUS STEP===", "twelfth chooser");    
+    firstChooser.setDefaultOption("===STEP 1===", "first chooser");
+    secondChooser.setDefaultOption("===STEP 2===", "second chooser");
+    thirdChooser.setDefaultOption("===STEP 3===", "third chooser");
+    fourthChooser.setDefaultOption("===STEP 4===", "fourth chooser");
+    fifthChooser.setDefaultOption("===STEP 5===", "fifth chooser");
+    sixthChooser.setDefaultOption("===STEP 6===", "sixth chooser");
+    seventhChooser.setDefaultOption("===STEP 7===", "seventh chooser");
+    eighthChooser.setDefaultOption("===STEP 8===", "eighth chooser");
+    ninthChooser.setDefaultOption("===STEP 9===", "ninth chooser");
+    tenthChooser.setDefaultOption("===STEP 10===", "tenth chooser");
+    eleventhChooser.setDefaultOption("===STEP 11===", "eleventh chooser");
+    twelfthChooser.setDefaultOption("===STEP 12===", "twelfth chooser");    
+    thirteenthChooser.setDefaultOption("===STEP 13===", "thirteenth chooser");
+    fourtheenthChooser.setDefaultOption("===STEP 14===", "fourteenth chooser");  
+    fifteenthChooser.setDefaultOption("===STEP 15===", "fifteenth chooser");
+    sixteenthChooser.setDefaultOption("===STEP 16===", "sixteenth chooser");
+    seventeethChooser.setDefaultOption("===STEP 17===", "seventeeth chooser");    
+    eighteenthChooser.setDefaultOption("===STEP 18===", "eighteenth chooser");
+    ninteenthChooser.setDefaultOption("===STEP 19===", "ninteenth chooser");    
+    twentiethChooser.setDefaultOption("===STEP 20===", "twentieth chooser");
+    twentyfirstChooser.setDefaultOption("===STEP 21===", "twentyfirst chooser");
+    twentysecondChooser.setDefaultOption("===STEP 22===", "twentysecond chooser");
+    twentythirdChooser.setDefaultOption("===STEP 23===", "twentythird chooser");
+    twentyfourthChooser.setDefaultOption("===STEP 24===", "twentyfourth chooser");    
+
+    presetAuto.setDefaultOption("===PRESET AUTOS===", "nothing");
+    presetAuto.addOption("Four Note, Speaker, From Top", "SPEAKER_4FromTop");
 
     chooserStream.forEach(
         e -> {
-            e.setDefaultOption("nothing this step", "nothing this step");
-            e.addOption("intake eject", "intake eject");
-            e.addOption("intake shooter feed", "intake shooter feed");
-            e.addOption("intake to ground (will spin intake motors)", "intake to ground");
-            e.addOption("intake to stow", "intake to stow");
-            e.addOption("intake to amp", "intake to amp");
-            e.addOption("to top note", "to top note");
-            e.addOption("to bottom note", "to bottom note");
-            e.addOption("to middle note", "to middle note");
-            e.addOption("to speaker", "to speaker");
-            e.addOption("to amp", "to amp");
+            e.addOption("5_sec_wait", "5_sec_wait");
+            e.addOption("i_eject", "intake eject");
+            e.addOption("i_feed", "intake shooter feed");
+            e.addOption("i_ground", "intake to ground");
+            e.addOption("i_stow", "intake to stow");
+            e.addOption("i_amp", "intake to amp");
+            e.addOption("r_topnote", "to top note");
+            e.addOption("r_bottomnote", "to bottom note");
+            e.addOption("r_middlenote", "to middle note");
+            e.addOption("r_speaker", "to speaker");
+            e.addOption("r_amp", "to amp");
         }
     );
 
@@ -196,13 +237,27 @@ public class RobotContainer {
     SmartDashboard.putData("tenth autonomous", tenthChooser);
     SmartDashboard.putData("eleventh autonomous", eleventhChooser);
     SmartDashboard.putData("twelfth autonomous", twelfthChooser);
+    SmartDashboard.putData("thirteenth autonomous", thirteenthChooser);
+    SmartDashboard.putData("fourteenth autonomous", fourtheenthChooser);
+    SmartDashboard.putData("fifteenth autonomous", fifteenthChooser);
+    SmartDashboard.putData("sixteenth autonomous", sixteenthChooser);
+    SmartDashboard.putData("seventeeth autonomous", seventeethChooser);
+    SmartDashboard.putData("eighteenth autonomous", eighteenthChooser);
+    SmartDashboard.putData("ninteenth autonomous", ninteenthChooser);
+    SmartDashboard.putData("twentieth autonomous", twentiethChooser);
+    SmartDashboard.putData("twentyfirst autonomous", twentyfirstChooser);
+    SmartDashboard.putData("twentysecond autonomous", twentysecondChooser);
+    SmartDashboard.putData("twentythird autonomous", twentythirdChooser);
+    SmartDashboard.putData("twentyfourth autonomous", twentyfourthChooser);
+
+    SmartDashboard.putData("preset auto", presetAuto);
 
     // Configure the button bindings
     configureButtonBindings();
     
     m_intake.setDefaultCommand(m_intakeCommand);
     m_climber.setDefaultCommand(climbercommand);
-    m_shooter.setDefaultCommand(shootercommand);
+    //m_shooter.setDefaultCommand(shootercommand);
 
 
     // Configure default commands
@@ -211,10 +266,10 @@ public class RobotContainer {
         // Turning is controlled by the X axis of the right stick.
         new RunCommand(
             () -> m_robotDrive.drive(
-                -MathUtil.applyDeadband(Math.pow(m_driverJoystick.getY(), 3), Math.pow(OIConstants.kDriveDeadband, 3)),
-                -MathUtil.applyDeadband(Math.pow(m_driverJoystick.getX(), 1), Math.pow(OIConstants.kDriveDeadband, 1)),
-                -MathUtil.applyDeadband(Math.pow(m_driverJoystick.getZ(), 3), Math.pow(OIConstants.kDriveDeadband, 3)),
-                true, true),
+                -MathUtil.applyDeadband(Math.pow(xboxController.getLeftY(), 3), Math.pow(OIConstants.kDriveDeadband, 3)),
+                -MathUtil.applyDeadband(Math.pow(xboxController.getLeftX(), 3), Math.pow(OIConstants.kDriveDeadband, 3)),
+                -MathUtil.applyDeadband(Math.pow(xboxController.getRightX(), 1), Math.pow(OIConstants.kDriveDeadband, 1)),
+                false, true),
             m_robotDrive));
   
         //climbersubsystem.setDefaultCommand(climbercommand);
@@ -255,6 +310,9 @@ public class RobotContainer {
         AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
+    if (selected == "5_sec_wait") {
+        return new FiveSecondWait();
+    }
     if (selected == "intake eject") {
         return new IntakeEject(m_intake);
     }
@@ -299,7 +357,7 @@ public class RobotContainer {
             m_robotDrive.getPose(),
             List.of(),
             new Pose2d(Units.inchesToMeters(noteX), Units.inchesToMeters(rightNoteY), 
-                new Rotation2d(getRobotDegreeToTarget((m_robotDrive.getPose().getY() - rightNoteY), (m_robotDrive.getPose().getX() - noteX)))),
+                new Rotation2d(Units.degreesToRadians(180))),
             config);
 
         SwerveControllerCommand RightNoteCommand =
@@ -364,7 +422,7 @@ public class RobotContainer {
         TrajectoryGenerator.generateTrajectory(
             m_robotDrive.getPose(),
             List.of(),
-            new Pose2d(Units.inchesToMeters(ampX), Units.inchesToMeters(ampY), new Rotation2d(Units.degreesToRadians(90))),
+            new Pose2d(Units.inchesToMeters(ampX), Units.inchesToMeters(ampY), new Rotation2d(Units.degreesToRadians(ampAngle))),
             config);
             
 
@@ -408,16 +466,63 @@ public class RobotContainer {
     return new NoCommand();
   }
 
-  public Command getAutonomousCommand() {
 
-        return Commands.sequence(
-                new ShooterCommand(m_shooter),
-                chosenautonomouscommand(firstChooser.getSelected()),
-                chosenautonomouscommand(secondChooser.getSelected()),
-                chosenautonomouscommand(thirdChooser.getSelected()),
-                chosenautonomouscommand(fourthChooser.getSelected()),
-                chosenautonomouscommand(fifthChooser.getSelected()),
-                chosenautonomouscommand(sixthChooser.getSelected()),
-                new InstantCommand(() -> m_robotDrive.drive(0,0,0,false,true)));
+
+  public Command getAutonomousCommand() {
+        if (presetAuto.getSelected() != "nothing") {
+            if (presetAuto.getSelected() == "SPEAKER_4FromTop") {
+                return Commands.sequence(
+                    new ShooterCommand(m_shooter),
+                    new IntakeShooter(m_intake),
+                    chosenautonomouscommand("to speaker"),
+                    new IntakeGround(m_intake),
+                    chosenautonomouscommand("to top note"),
+                    new IntakeStow(m_intake),
+                    chosenautonomouscommand("to speaker"),
+                    new IntakeShooter(m_intake),
+                    new IntakeGround(m_intake),
+                    chosenautonomouscommand("to middle note"),
+                    new IntakeStow(m_intake),
+                    chosenautonomouscommand("to speaker"),
+                    new IntakeShooter(m_intake),
+                    new IntakeGround(m_intake),
+                    chosenautonomouscommand("to bottom note"),
+                    new IntakeStow(m_intake),
+                    chosenautonomouscommand("to speaker"),
+                    new IntakeEject(m_intake),
+                    chosenautonomouscommand("to middle note"),
+                    new InstantCommand(() -> m_robotDrive.drive(0,0,0,false,true)));
+            }
+        } 
+        else {
+            return Commands.sequence(
+                    //new ShooterCommand(m_shooter),
+                    chosenautonomouscommand(firstChooser.getSelected()),
+                    chosenautonomouscommand(secondChooser.getSelected()),
+                    chosenautonomouscommand(thirdChooser.getSelected()),
+                    chosenautonomouscommand(fourthChooser.getSelected()),
+                    chosenautonomouscommand(fifthChooser.getSelected()),
+                    chosenautonomouscommand(sixthChooser.getSelected()),
+                    chosenautonomouscommand(seventhChooser.getSelected()),
+                    chosenautonomouscommand(eighthChooser.getSelected()),
+                    chosenautonomouscommand(ninthChooser.getSelected()),
+                    chosenautonomouscommand(tenthChooser.getSelected()),
+                    chosenautonomouscommand(eleventhChooser.getSelected()),
+                    chosenautonomouscommand(twelfthChooser.getSelected()),
+                    chosenautonomouscommand(thirteenthChooser.getSelected()),
+                    chosenautonomouscommand(fourtheenthChooser.getSelected()),
+                    chosenautonomouscommand(fifteenthChooser.getSelected()),
+                    chosenautonomouscommand(sixteenthChooser.getSelected()),
+                    chosenautonomouscommand(seventeethChooser.getSelected()),
+                    chosenautonomouscommand(eighteenthChooser.getSelected()),
+                    chosenautonomouscommand(ninteenthChooser.getSelected()),
+                    chosenautonomouscommand(twentiethChooser.getSelected()),
+                    chosenautonomouscommand(twentyfirstChooser.getSelected()),
+                    chosenautonomouscommand(twentysecondChooser.getSelected()),
+                    chosenautonomouscommand(twentythirdChooser.getSelected()),
+                    chosenautonomouscommand(twentyfourthChooser.getSelected()),
+                    new InstantCommand(() -> m_robotDrive.drive(0,0,0,false,true)));
+        }
+        return null;
     }
 }

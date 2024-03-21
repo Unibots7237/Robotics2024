@@ -1,7 +1,9 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.SparkAbsoluteEncoder.Type;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
@@ -13,7 +15,7 @@ import frc.robot.Constants;
 import frc.robot.Helpers;
 
 public class IntakeSubsystem extends Subsystem {
-  private static final double k_pivotMotorP = 0.15;
+  private static final double k_pivotMotorP = 0.09;
   private static final double k_pivotMotorI = 0.0;
   private static final double k_pivotMotorD = 0.0;
 
@@ -25,8 +27,10 @@ public class IntakeSubsystem extends Subsystem {
   //private static final double kA = 0.0;
   //private final ArmFeedforward feedforward = new ArmFeedforward(kS, kG, kV, kA);
 
+  private CANSparkMax mIntakeMotor;
+  private CANSparkMax mPivotMotor;
 
-  public final DutyCycleEncoder m_pivotEncoder = new DutyCycleEncoder(Constants.Intake.k_pivotEncoderId);
+  public final AbsoluteEncoder m_pivotEncoder;
   private final DigitalInput m_IntakeLimitSwitch = new DigitalInput(Constants.Intake.k_intakeLimitSwitchId);
 
 
@@ -41,9 +45,6 @@ public class IntakeSubsystem extends Subsystem {
     return mInstance;
   }
 
-  private CANSparkMax mIntakeMotor;
-  private CANSparkMax mPivotMotor;
-
   public IntakeSubsystem() {
     super("IntakeSubystem");
 
@@ -53,6 +54,7 @@ public class IntakeSubsystem extends Subsystem {
 
     mPivotMotor = new CANSparkMax(Constants.Intake.kPivotMotorId, MotorType.kBrushless);
     mPivotMotor.restoreFactoryDefaults();
+    m_pivotEncoder = mPivotMotor.getAbsoluteEncoder(Type.kDutyCycle);
     mPivotMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
     mPivotMotor.setSmartCurrentLimit(10);
 
@@ -97,7 +99,7 @@ public class IntakeSubsystem extends Subsystem {
     double pivot_angle = pivotTargetToAngle(m_periodicIO.pivot_target);
     m_periodicIO.intake_pivot_voltage = m_pivotPID.calculate(getPivotAngleDegrees(), pivot_angle);
     // If the pivot is at exactly 0.0, it's probably not connected, so disable it
-    if (m_pivotEncoder.get() == 0.0) {
+    if (m_pivotEncoder.getPosition() == 0.0) {
       m_periodicIO.intake_pivot_voltage = 0.0;
     }
 
@@ -105,7 +107,7 @@ public class IntakeSubsystem extends Subsystem {
     m_periodicIO.intake_speed = intakeStateToSpeed(m_periodicIO.intake_state);
     putString("State", m_periodicIO.intake_state.toString());
     SmartDashboard.putNumber("Pivot Angle", getPivotAngleDegrees());
-    SmartDashboard.putNumber("Intake Encoder Real Angle", m_pivotEncoder.getAbsolutePosition());
+    SmartDashboard.putNumber("Intake Encoder Real Angle", m_pivotEncoder.getPosition());
   }
 
   @Override
@@ -124,8 +126,8 @@ public class IntakeSubsystem extends Subsystem {
   @Override
   public void outputTelemetry() {
     putNumber("Speed", intakeStateToSpeed(m_periodicIO.intake_state));
-    putNumber("Pivot/Abs Enc (get)", m_pivotEncoder.get());
-    putNumber("Pivot/Abs Enc (getAbsolutePosition)", m_pivotEncoder.getAbsolutePosition());
+    putNumber("Pivot/Abs Enc (get)", m_pivotEncoder.getPosition());
+    putNumber("Pivot/Abs Enc (getAbsolutePosition)", m_pivotEncoder.getPosition());
     putNumber("Pivot/Abs Enc (getPivotAngleDegrees)", getPivotAngleDegrees());
     putNumber("Pivot/Setpoint", pivotTargetToAngle(m_periodicIO.pivot_target));
 
@@ -164,10 +166,10 @@ public class IntakeSubsystem extends Subsystem {
       case PULSE:
         // Use the timer to pulse the intake on for a 1/16 second,
         // then off for a 15/16 second
-        if (Timer.getFPGATimestamp() % 1.0 < (1.0 / 45.0)) {
-          return Constants.Intake.k_intakeSpeed;
-        }
-        return 0.0;
+        //if (Timer.getFPGATimestamp() % 1.0 < (1.0 / 45.0)) {
+          //return Constants.Intake.k_intakeSpeed;
+        //}
+        //return 0.25;
       case FEED_SHOOTER:
         return Constants.Intake.k_feedShooterSpeed;
       case SHOOT_OUT_A_LITTLE:
@@ -187,7 +189,7 @@ public class IntakeSubsystem extends Subsystem {
   }
 
   public double getPivotAngleDegrees() {
-    double value = m_pivotEncoder.getAbsolutePosition();
+    double value = m_pivotEncoder.getPosition();
 
     return Units.rotationsToDegrees(Helpers.modRotations(value));
   }

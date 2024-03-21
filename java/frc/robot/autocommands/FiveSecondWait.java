@@ -4,30 +4,26 @@
 
 package frc.robot.autocommands;
 
-import frc.robot.subsystems.IntakeSubsystem;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** An example command that uses an example subsystem. */
-public class IntakeStow extends Command {
+public class FiveSecondWait extends Command {
+  private static Timer timer = new Timer();
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-  private final IntakeSubsystem m_intake;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param m_intake The subsystem used by this command.
    */
-  public IntakeStow(IntakeSubsystem intake) {
-    m_intake = intake;
-    // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(m_intake);
+  public FiveSecondWait() {
+    timer.start();
   }
 
 // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_intake.goToStow();
-    //m_intake.pulse();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -43,6 +39,9 @@ public class IntakeStow extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return true;
+    if (timer.get() >= 5) {
+      return true;
+    }
+    return false;
   }
 }

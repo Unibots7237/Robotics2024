@@ -124,10 +124,9 @@ public final class Constants {
   }
 
   public static final class OIConstants {
-    public static final int kDriverJoystickPort = 0;
-    public static final int kDriverJoystickTurningPort = 1;
-    public static final int kSecondaryControllerPort = 2;
-    public static final double kDriveDeadband = 0.1;
+    public static final int xboxPort = 0;
+    public static final int logitechPort = 1;
+    public static final double kDriveDeadband = 0.2;
   }
 
   public static final class AutoConstants {

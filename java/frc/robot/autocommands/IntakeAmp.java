@@ -5,12 +5,14 @@
 package frc.robot.autocommands;
 
 import frc.robot.subsystems.IntakeSubsystem;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** An example command that uses an example subsystem. */
 public class IntakeAmp extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final IntakeSubsystem m_intake;
+  private final Timer timer = new Timer();
 
   /**
    * Creates a new ExampleCommand.
@@ -27,6 +29,7 @@ public class IntakeAmp extends Command {
   @Override
   public void initialize() {
     m_intake.goToAmp();
+    timer.start();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -42,6 +45,6 @@ public class IntakeAmp extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return true;
+    if (timer.get() > 1.5) {return true;} else {return false;}
   }
 }
